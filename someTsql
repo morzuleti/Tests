@@ -1,0 +1,28 @@
+//Функция возвращающая отчет по заданным датам 
+
+ALTER FUNCTION [dbo].[GetOtch]
+(
+	@datest smalldatetime = '2014-01-01',
+    @dateend smalldatetime ,
+    @firstd nvarchar (6) = 'A00.00',
+	@secondd nvarchar (6) = 'Z99.99'
+	
+)
+RETURNS 
+TABLE 
+
+AS
+RETURN 
+select ISNULL(FGDS,0) as Rez, m.code_mo as LPU,m.name_mo as Namemo  from (Select ISNULL(COUNT(id_pacient),0) as FGDS, lpu as lpucode, name_mo as lpu_name from View_1 
+where (dt_ter between @datest and @dateend)
+and ((Dgmaina BETWEEN @firstd AND @secondd))  group by lpu, name_mo) b
+right join medorgs m on m.code_mo=b.lpucode group by FGDS, m.code_mo,m.name_mo
+
+
+
+//Скрипт удаления дублей по ключу фио+др
+
+delete from t from main_fio t, main_fio v
+where (t.Surname+t.Firstname+t.Patronymic+CAST(t.datebirth AS varchar(20))+CAST(t.lpu as varchar(5))) = (v.Surname+v.Firstname+v.Patronymic+CAST(v.datebirth AS varchar(20))+CAST(v.lpu as varchar(5)))
+and t.id_pacient > v.id_pacient
+
